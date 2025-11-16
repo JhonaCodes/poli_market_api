@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: polimarket_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: polimarket
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ../polimarket_schema_postgresql.sql:/docker-entrypoint-initdb.d/01-schema.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - polimarket-network
+
+  # PoliMarket API
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: polimarket_api
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@postgres:5432/polimarket
+      SERVER_HOST: 0.0.0.0
+      SERVER_PORT: 8080
+      RUST_LOG: info
+      POOL_MAX_SIZE: 10
+      POOL_MIN_IDLE: 2
+      POOL_TIMEOUT_SECONDS: 30
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - polimarket-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  polimarket-network:
+    driver: bridge
