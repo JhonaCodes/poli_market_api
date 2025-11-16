@@ -1,33 +1,81 @@
+# ========================================
+# POLIMARKET API - Docker Ignore
+# ========================================
+# Files and directories to exclude from Docker build context
+# This reduces build time and image size
+
+# ----------------------------------------
 # Git
+# ----------------------------------------
 .git
 .gitignore
+.gitattributes
 
-# Docker
-Dockerfile
-docker-compose.yml
+# ----------------------------------------
+# Docker Files
+# ----------------------------------------
+Dockerfile*
+docker-compose*.yml
 .dockerignore
 
-# Build artifacts
+# ----------------------------------------
+# Build Artifacts
+# ----------------------------------------
 target/
-Cargo.lock
+# Note: Cargo.lock is intentionally NOT ignored
+# It ensures reproducible builds in Docker
 
-# IDE
+# ----------------------------------------
+# IDE and Editor Files
+# ----------------------------------------
 .idea/
 .vscode/
 *.swp
 *.swo
+*.swn
+*~
+.editorconfig
 
-# Environment
+# ----------------------------------------
+# Environment Files
+# ----------------------------------------
 .env
-.env.local
+.env.*
+!.env.example
 
-# OS
+# ----------------------------------------
+# Operating System Files
+# ----------------------------------------
 .DS_Store
 Thumbs.db
+desktop.ini
 
-# Documentation
+# ----------------------------------------
+# Documentation (not needed in runtime)
+# ----------------------------------------
 *.md
-README.md
+!README.md
+docs/
 
-# Logs
+# ----------------------------------------
+# Logs and Temporary Files
+# ----------------------------------------
 *.log
+*.tmp
+*.temp
+tmp/
+temp/
+
+# ----------------------------------------
+# Testing and CI
+# ----------------------------------------
+.github/
+.gitlab-ci.yml
+.travis.yml
+tests/
+coverage/
+
+# ----------------------------------------
+# Other
+# ----------------------------------------
+.cargo/config.toml

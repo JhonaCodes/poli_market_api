@@ -9,30 +9,48 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: polimarket
+      POSTGRES_INITDB_ARGS: "-E UTF8 --locale=en_US.UTF-8"
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ../polimarket_schema_postgresql.sql:/docker-entrypoint-initdb.d/01-schema.sql
+      - ../polimarket_schema_postgresql.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      test: ["CMD-SHELL", "pg_isready -U postgres -d polimarket"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
     networks:
       - polimarket-network
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   # PoliMarket API
   api:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        - RUST_VERSION=1.90
     container_name: polimarket_api
     environment:
+      # Database Configuration
       DATABASE_URL: postgres://postgres:postgres@postgres:5432/polimarket
+
+      # Server Configuration
       SERVER_HOST: 0.0.0.0
       SERVER_PORT: 8080
+
+      # Logging
       RUST_LOG: info
+      RUST_BACKTRACE: 1
+
+      # Connection Pool Settings
       POOL_MAX_SIZE: 10
       POOL_MIN_IDLE: 2
       POOL_TIMEOUT_SECONDS: 30
@@ -44,11 +62,36 @@ services:
     networks:
       - polimarket-network
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    # Security options
+    security_opt:
+      - no-new-privileges:true
+    # Resource limits (adjust based on your needs)
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
 
 volumes:
   postgres_data:
     driver: local
+    name: polimarket_postgres_data
 
 networks:
   polimarket-network:
     driver: bridge
+    name: polimarket_network
