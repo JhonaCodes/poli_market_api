@@ -1,8 +1,20 @@
 use actix_web::{web, HttpResponse, ResponseError, Result};
-use crate::modules::inventarios::model::MovimientoRequest;
+use crate::modules::inventarios::model::{MovimientoRequest, MovimientoRegistradoResponse, DisponibilidadResponse};
+use crate::modules::common::errors::ErrorResponse;
 use crate::state::app_state::AppState;
 
 /// POST /api/inventario/movimientos - Registrar movimiento de inventario
+#[utoipa::path(
+    post,
+    path = "/v1/inventario/movimientos",
+    tag = "Inventario",
+    request_body = MovimientoRequest,
+    responses(
+        (status = 201, description = "Movimiento de inventario registrado exitosamente", body = MovimientoRegistradoResponse),
+        (status = 400, description = "Datos de entrada inválidos o producto no encontrado", body = ErrorResponse),
+        (status = 500, description = "Error interno del servidor", body = ErrorResponse)
+    )
+)]
 pub async fn registrar_movimiento(
     state: web::Data<AppState>,
     body: web::Json<MovimientoRequest>,
@@ -16,6 +28,19 @@ pub async fn registrar_movimiento(
 }
 
 /// GET /api/inventario/disponibilidad/:id - RF5: Consultar disponibilidad
+#[utoipa::path(
+    get,
+    path = "/v1/inventario/disponibilidad/{id}",
+    tag = "Inventario",
+    params(
+        ("id" = String, Path, description = "ID del producto (UUID)")
+    ),
+    responses(
+        (status = 200, description = "Disponibilidad del producto consultada exitosamente", body = DisponibilidadResponse),
+        (status = 404, description = "Producto no encontrado", body = ErrorResponse),
+        (status = 500, description = "Error interno del servidor", body = ErrorResponse)
+    )
+)]
 pub async fn obtener_disponibilidad(
     state: web::Data<AppState>,
     path: web::Path<String>,

@@ -4,13 +4,15 @@ use diesel::serialize::{self, ToSql, Output};
 use std::io::Write;
 use diesel::{AsExpression, FromSqlRow};
 use serde::{Deserialize, Serialize};
+use utoipa::ToSchema;
 
 // Import SQL types from schema
 use crate::schema::sql_types::{TipoPerfil as TipoPerfilSql, TipoMovimiento as TipoMovimientoSql};
 
 // Enum for TipoPerfil
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, AsExpression, FromSqlRow)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, AsExpression, FromSqlRow, ToSchema)]
 #[diesel(sql_type = TipoPerfilSql)]
+#[schema(example = "CLIENTE")]
 pub enum TipoPerfil {
     #[serde(rename = "VENDEDOR")]
     Vendedor,
@@ -43,8 +45,9 @@ impl FromSql<TipoPerfilSql, Pg> for TipoPerfil {
 }
 
 // Enum for TipoMovimiento
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, AsExpression, FromSqlRow)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, AsExpression, FromSqlRow, ToSchema)]
 #[diesel(sql_type = TipoMovimientoSql)]
+#[schema(example = "ENTRADA")]
 pub enum TipoMovimiento {
     #[serde(rename = "ENTRADA")]
     Entrada,

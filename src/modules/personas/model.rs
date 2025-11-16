@@ -2,6 +2,7 @@ use chrono::NaiveDateTime;
 use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
+use utoipa::ToSchema;
 use crate::modules::common::types::TipoPerfil;
 use crate::schema::personas;
 
@@ -21,13 +22,19 @@ pub struct Persona {
 }
 
 // DTO for API Response
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
 pub struct PersonaResponse {
+    #[schema(example = "550e8400-e29b-41d4-a716-446655440000")]
     pub id: String,
+    #[schema(example = "Juan Pérez")]
     pub nombre: String,
+    #[schema(example = "1234567890")]
     pub documento: String,
+    #[schema(example = "CLIENTE")]
     pub perfil: String,
+    #[schema(example = "juan.perez@example.com")]
     pub email: Option<String>,
+    #[schema(example = "+57 300 123 4567")]
     pub telefono: Option<String>,
 }
 
@@ -56,18 +63,25 @@ pub struct NuevaPersona {
 }
 
 // DTO for persona creation request
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, ToSchema)]
 pub struct CrearPersonaRequest {
+    #[schema(example = "Juan Pérez")]
     pub nombre: String,
+    #[schema(example = "1234567890")]
     pub documento: String,
+    #[schema(example = "CLIENTE")]
     pub perfil: String,
+    #[schema(example = "juan.perez@example.com")]
     pub email: Option<String>,
+    #[schema(example = "+57 300 123 4567")]
     pub telefono: Option<String>,
 }
 
 // DTO for persona creation response
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, ToSchema)]
 pub struct PersonaCreadaResponse {
+    #[schema(example = "550e8400-e29b-41d4-a716-446655440000")]
     pub id: String,
+    #[schema(example = "Persona creada exitosamente")]
     pub mensaje: String,
 }

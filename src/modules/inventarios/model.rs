@@ -2,6 +2,7 @@ use chrono::NaiveDateTime;
 use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
+use utoipa::ToSchema;
 use crate::modules::common::types::TipoMovimiento;
 use crate::schema::{inventarios, detalle_inventarios};
 
@@ -35,9 +36,11 @@ pub struct DetalleInventario {
 }
 
 // DTO for stock availability response
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
 pub struct DisponibilidadResponse {
+    #[schema(example = "550e8400-e29b-41d4-a716-446655440000")]
     pub id_producto: String,
+    #[schema(example = 45)]
     pub cantidad_disponible: i32,
 }
 
@@ -54,18 +57,25 @@ pub struct NuevoMovimiento {
 }
 
 // DTO for movement request
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, ToSchema)]
 pub struct MovimientoRequest {
+    #[schema(example = "550e8400-e29b-41d4-a716-446655440000")]
     pub id_producto: String,
+    #[schema(example = "ENTRADA")]
     pub tipo_movimiento: String,
+    #[schema(example = "660e8400-e29b-41d4-a716-446655440000")]
     pub id_persona: String,
+    #[schema(example = 20)]
     pub cantidad: i32,
+    #[schema(example = "Compra de inventario mensual")]
     pub observaciones: Option<String>,
 }
 
 // DTO for movement response
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, ToSchema)]
 pub struct MovimientoRegistradoResponse {
+    #[schema(example = "770e8400-e29b-41d4-a716-446655440000")]
     pub id: String,
+    #[schema(example = "Movimiento registrado exitosamente")]
     pub mensaje: String,
 }

@@ -1,5 +1,6 @@
 use actix_web::{HttpResponse, ResponseError};
 use thiserror::Error;
+use utoipa::ToSchema;
 
 #[derive(Error, Debug)]
 pub enum ApiError {
@@ -72,10 +73,10 @@ impl From<diesel::result::Error> for ApiError {
     }
 }
 
-#[derive(serde::Serialize)]
-struct ErrorResponse {
-    error: String,
-    code: &'static str,
+#[derive(serde::Serialize, ToSchema)]
+pub struct ErrorResponse {
+    pub error: String,
+    pub code: &'static str,
 }
 
 pub type ApiResult<T> = Result<T, ApiError>;

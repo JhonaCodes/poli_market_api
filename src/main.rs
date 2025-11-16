@@ -11,12 +11,80 @@ use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 use dotenvy::dotenv;
 use log::{info, error, warn};
 use std::time::Duration;
+use utoipa::OpenApi;
+use utoipa_swagger_ui::SwaggerUi;
 
 use crate::config::Config;
 use crate::state::app_state::AppState;
 
 // Embed migrations into the binary
 pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations");
+
+// OpenAPI Documentation
+#[derive(OpenApi)]
+#[openapi(
+    info(
+        title = "PoliMarket API",
+        version = "0.1.0",
+        description = "API REST para el sistema de gestión de ventas e inventario del PoliMarket. \
+        Esta API permite gestionar personas (clientes, vendedores, proveedores), productos, \
+        movimientos de inventario y ventas con control automático de stock.",
+        contact(
+            name = "PoliMarket Team",
+            email = "soporte@polimarket.com"
+        )
+    ),
+    tags(
+        (name = "Health", description = "Endpoints de verificación del estado del servicio"),
+        (name = "Personas", description = "Gestión de personas (clientes, vendedores, proveedores)"),
+        (name = "Productos", description = "Gestión de productos y consulta de inventario"),
+        (name = "Inventario", description = "Movimientos de inventario y disponibilidad de productos"),
+        (name = "Ventas", description = "Procesamiento y consulta de ventas")
+    ),
+    paths(
+        health_check,
+        modules::personas::handler::crear_persona,
+        modules::personas::handler::obtener_persona,
+        modules::personas::handler::listar_personas,
+        modules::productos::handler::crear_producto,
+        modules::productos::handler::obtener_producto,
+        modules::productos::handler::listar_productos,
+        modules::inventarios::handler::registrar_movimiento,
+        modules::inventarios::handler::obtener_disponibilidad,
+        modules::ventas::handler::crear_venta,
+        modules::ventas::handler::listar_ventas,
+        modules::ventas::handler::obtener_venta,
+    ),
+    components(
+        schemas(
+            // Common types
+            modules::common::errors::ErrorResponse,
+            modules::common::types::TipoPerfil,
+            modules::common::types::TipoMovimiento,
+            // Personas
+            modules::personas::model::CrearPersonaRequest,
+            modules::personas::model::PersonaResponse,
+            modules::personas::model::PersonaCreadaResponse,
+            modules::personas::handler::PersonasQuery,
+            // Productos
+            modules::productos::model::CrearProductoRequest,
+            modules::productos::model::ProductoResponse,
+            modules::productos::model::ProductoCreadoResponse,
+            // Inventarios
+            modules::inventarios::model::MovimientoRequest,
+            modules::inventarios::model::MovimientoRegistradoResponse,
+            modules::inventarios::model::DisponibilidadResponse,
+            // Ventas
+            modules::ventas::model::CrearVentaRequest,
+            modules::ventas::model::DetalleVentaRequest,
+            modules::ventas::model::VentaResponse,
+            modules::ventas::model::DetalleVentaResponse,
+            modules::ventas::model::VentaCreadaResponse,
+            modules::ventas::model::VentasQueryParams,
+        )
+    )
+)]
+struct ApiDoc;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -126,6 +194,9 @@ async fn main() -> std::io::Result<()> {
 
     info!("🌐 Configuring HTTP routes...");
 
+    // Generate OpenAPI spec
+    let openapi = ApiDoc::openapi();
+
     let server = HttpServer::new(move || {
         info!("🔄 Creating new worker instance...");
 
@@ -142,6 +213,11 @@ async fn main() -> std::io::Result<()> {
             .app_data(app_state.clone())
             .wrap(Logger::default())
             .wrap(cors)
+            // Swagger UI
+            .service(
+                SwaggerUi::new("/swagger-ui/{_:.*}")
+                    .url("/api-docs/openapi.json", openapi.clone())
+            )
             .service(
                 web::scope("/v1")
                     // Health check endpoint
@@ -179,10 +255,29 @@ async fn main() -> std::io::Result<()> {
     info!("   POST /v1/ventas");
     info!("   GET  /v1/ventas");
     info!("   GET  /v1/ventas/{{id}}");
+    info!("");
+    info!("📚 API Documentation:");
+    info!("   Swagger UI: http://{}:{}/swagger-ui/", server_host, server_port);
+    info!("   OpenAPI JSON: http://{}:{}/api-docs/openapi.json", server_host, server_port);
 
     server.run().await
 }
 
+/// Health check endpoint - Verifica el estado del servicio
+#[utoipa::path(
+    get,
+    path = "/v1/health",
+    tag = "Health",
+    responses(
+        (status = 200, description = "Servicio operativo", body = serde_json::Value,
+            example = json!({
+                "status": "healthy",
+                "service": "PoliMarket API",
+                "version": "0.1.0"
+            })
+        )
+    )
+)]
 async fn health_check() -> HttpResponse {
     HttpResponse::Ok().json(serde_json::json!({
         "status": "healthy",

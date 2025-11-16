@@ -1,14 +1,28 @@
 use actix_web::{web, HttpResponse, ResponseError, Result};
 use serde::Deserialize;
-use crate::modules::personas::model::CrearPersonaRequest;
+use utoipa::{ToSchema, IntoParams};
+use crate::modules::personas::model::{CrearPersonaRequest, PersonaResponse, PersonaCreadaResponse};
+use crate::modules::common::errors::ErrorResponse;
 use crate::state::app_state::AppState;
 
-#[derive(Deserialize)]
+#[derive(Deserialize, ToSchema, IntoParams)]
 pub struct PersonasQuery {
+    #[schema(example = "CLIENTE")]
     pub tipo: Option<String>,
 }
 
 /// POST /api/personas - Crear nueva persona
+#[utoipa::path(
+    post,
+    path = "/v1/personas",
+    tag = "Personas",
+    request_body = CrearPersonaRequest,
+    responses(
+        (status = 201, description = "Persona creada exitosamente", body = PersonaCreadaResponse),
+        (status = 400, description = "Datos de entrada inválidos", body = ErrorResponse),
+        (status = 500, description = "Error interno del servidor", body = ErrorResponse)
+    )
+)]
 pub async fn crear_persona(
     state: web::Data<AppState>,
     body: web::Json<CrearPersonaRequest>,
@@ -22,6 +36,19 @@ pub async fn crear_persona(
 }
 
 /// GET /api/personas/:id - RF4: Obtener persona por ID
+#[utoipa::path(
+    get,
+    path = "/v1/personas/{id}",
+    tag = "Personas",
+    params(
+        ("id" = String, Path, description = "ID de la persona (UUID)")
+    ),
+    responses(
+        (status = 200, description = "Persona encontrada", body = PersonaResponse),
+        (status = 404, description = "Persona no encontrada", body = ErrorResponse),
+        (status = 500, description = "Error interno del servidor", body = ErrorResponse)
+    )
+)]
 pub async fn obtener_persona(
     state: web::Data<AppState>,
     path: web::Path<String>,
@@ -36,6 +63,18 @@ pub async fn obtener_persona(
 }
 
 /// GET /api/personas - Listar personas
+#[utoipa::path(
+    get,
+    path = "/v1/personas",
+    tag = "Personas",
+    params(
+        PersonasQuery
+    ),
+    responses(
+        (status = 200, description = "Lista de personas", body = Vec<PersonaResponse>),
+        (status = 500, description = "Error interno del servidor", body = ErrorResponse)
+    )
+)]
 pub async fn listar_personas(
     state: web::Data<AppState>,
     query: web::Query<PersonasQuery>,

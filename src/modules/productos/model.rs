@@ -3,6 +3,7 @@ use chrono::NaiveDateTime;
 use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
+use utoipa::ToSchema;
 use crate::schema::productos;
 
 // Domain Model (Database Entity)
@@ -20,12 +21,17 @@ pub struct Producto {
 }
 
 // DTO for API Response
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
 pub struct ProductoResponse {
+    #[schema(example = "550e8400-e29b-41d4-a716-446655440000")]
     pub id: String,
+    #[schema(example = "Laptop Dell Inspiron 15")]
     pub nombre: String,
+    #[schema(example = 1200000.0)]
     pub precio_unitario: f64,
+    #[schema(example = "unidad")]
     pub unidad_venta: String,
+    #[schema(example = 50)]
     pub stock_actual: i32,
 }
 
@@ -40,17 +46,23 @@ pub struct NuevoProducto {
 }
 
 // DTO for producto creation request
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, ToSchema)]
 pub struct CrearProductoRequest {
+    #[schema(example = "Laptop Dell Inspiron 15")]
     pub nombre: String,
+    #[schema(example = 50)]
     pub cantidad: i32,
+    #[schema(example = "unidad")]
     pub unidad_venta: String,
+    #[schema(example = 1200000.0)]
     pub precio_unitario: f64,
 }
 
 // DTO for producto creation response
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, ToSchema)]
 pub struct ProductoCreadoResponse {
+    #[schema(example = "550e8400-e29b-41d4-a716-446655440000")]
     pub id: String,
+    #[schema(example = "Producto creado exitosamente")]
     pub mensaje: String,
 }

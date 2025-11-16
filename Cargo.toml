@@ -38,3 +38,7 @@ anyhow = "1.0"
 
 # Big decimal for monetary values
 bigdecimal = { version = "0.4", features = ["serde"] }
+
+# OpenAPI documentation
+utoipa = { version = "5.2", features = ["actix_extras", "uuid", "chrono"] }
+utoipa-swagger-ui = { version = "8.0", features = ["actix-web"] }

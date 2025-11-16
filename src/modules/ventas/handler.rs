@@ -1,8 +1,21 @@
 use actix_web::{web, HttpResponse, ResponseError, Result};
-use crate::modules::ventas::model::{CrearVentaRequest, VentasQueryParams};
+use crate::modules::ventas::model::{CrearVentaRequest, VentasQueryParams, VentaCreadaResponse, VentaResponse};
+use crate::modules::common::errors::ErrorResponse;
 use crate::state::app_state::AppState;
 
 /// POST /api/ventas - RF1: Crear venta
+#[utoipa::path(
+    post,
+    path = "/v1/ventas",
+    tag = "Ventas",
+    request_body = CrearVentaRequest,
+    responses(
+        (status = 201, description = "Venta creada exitosamente con descuento de inventario automático", body = VentaCreadaResponse),
+        (status = 400, description = "Datos inválidos, cliente inactivo, o stock insuficiente", body = ErrorResponse),
+        (status = 404, description = "Cliente o producto no encontrado", body = ErrorResponse),
+        (status = 500, description = "Error interno del servidor", body = ErrorResponse)
+    )
+)]
 pub async fn crear_venta(
     state: web::Data<AppState>,
     body: web::Json<CrearVentaRequest>,
@@ -16,6 +29,18 @@ pub async fn crear_venta(
 }
 
 /// GET /api/ventas - RF2: Listar ventas con filtros
+#[utoipa::path(
+    get,
+    path = "/v1/ventas",
+    tag = "Ventas",
+    params(
+        VentasQueryParams
+    ),
+    responses(
+        (status = 200, description = "Lista de ventas con filtros aplicados", body = Vec<VentaResponse>),
+        (status = 500, description = "Error interno del servidor", body = ErrorResponse)
+    )
+)]
 pub async fn listar_ventas(
     state: web::Data<AppState>,
     query: web::Query<VentasQueryParams>,
@@ -34,6 +59,19 @@ pub async fn listar_ventas(
 }
 
 /// GET /api/ventas/:id - RF2: Obtener venta por ID
+#[utoipa::path(
+    get,
+    path = "/v1/ventas/{id}",
+    tag = "Ventas",
+    params(
+        ("id" = String, Path, description = "ID de la venta (UUID)")
+    ),
+    responses(
+        (status = 200, description = "Venta encontrada con todos sus detalles", body = VentaResponse),
+        (status = 404, description = "Venta no encontrada", body = ErrorResponse),
+        (status = 500, description = "Error interno del servidor", body = ErrorResponse)
+    )
+)]
 pub async fn obtener_venta(
     state: web::Data<AppState>,
     path: web::Path<String>,
