@@ -55,8 +55,12 @@ WORKDIR /app
 # Copy binary from builder
 COPY --from=builder /app/target/release/poli_market_api .
 
-# Ensure binary is executable
-RUN chmod +x ./poli_market_api
+# Copy entrypoint script
+COPY docker-entrypoint.sh .
+
+# Ensure binary and script are executable
+RUN chmod +x ./poli_market_api && \
+    chmod +x ./docker-entrypoint.sh
 
 # Create non-root user for security
 RUN useradd -m -u 1000 appuser && \
@@ -71,5 +75,8 @@ EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
     CMD curl -f http://localhost:8080/v1/health || exit 1
 
-# Use exec form to ensure proper signal handling
+# Use entrypoint for better debugging
+ENTRYPOINT ["./docker-entrypoint.sh"]
+
+# Run the application
 CMD ["./poli_market_api"]
