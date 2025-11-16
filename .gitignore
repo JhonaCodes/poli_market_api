@@ -1,6 +1,6 @@
 # Rust
 /target/
-Cargo.lock
+# Cargo.lock - NO IGNORAR para aplicaciones (solo para librerías)
 
 # Environment
 .env

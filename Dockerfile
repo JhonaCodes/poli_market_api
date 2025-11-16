@@ -1,12 +1,14 @@
 # Multi-stage build for Rust application
 
 # Stage 1: Builder
-FROM rust:1.75 as builder
+FROM rust:1.90 AS builder
 
 WORKDIR /app
 
 # Copy manifests
-COPY Cargo.toml Cargo.lock ./
+COPY Cargo.toml ./
+# Cargo.lock es opcional - se generará si no existe
+COPY Cargo.loc[k] ./
 
 # Create a dummy main.rs to cache dependencies
 RUN mkdir src && \
