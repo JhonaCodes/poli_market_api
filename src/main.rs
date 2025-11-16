@@ -7,12 +7,16 @@ use actix_web::{web, App, HttpServer, HttpResponse, middleware::Logger};
 use actix_cors::Cors;
 use diesel::r2d2::{ConnectionManager, Pool};
 use diesel::PgConnection;
+use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 use dotenvy::dotenv;
-use log::{info, error};
+use log::{info, error, warn};
 use std::time::Duration;
 
 use crate::config::Config;
 use crate::state::app_state::AppState;
+
+// Embed migrations into the binary
+pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations");
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -63,11 +67,11 @@ async fn main() -> std::io::Result<()> {
     let mut retry_count = 0;
     const MAX_RETRIES: u32 = 5;
 
-    loop {
+    let mut conn = loop {
         match pool.get() {
-            Ok(_) => {
+            Ok(conn) => {
                 info!("✓ Database connection test: OK");
-                break;
+                break conn;
             }
             Err(e) => {
                 retry_count += 1;
@@ -83,6 +87,25 @@ async fn main() -> std::io::Result<()> {
                        retry_count, MAX_RETRIES, e);
                 std::thread::sleep(Duration::from_secs(2));
             }
+        }
+    };
+
+    // Run pending migrations automatically
+    info!("🔄 Running database migrations...");
+    match conn.run_pending_migrations(MIGRATIONS) {
+        Ok(versions) => {
+            if versions.is_empty() {
+                info!("✓ Database schema is up to date (no pending migrations)");
+            } else {
+                info!("✓ Successfully applied {} migration(s):", versions.len());
+                for version in versions {
+                    info!("   - {}", version);
+                }
+            }
+        }
+        Err(e) => {
+            error!("✗ Failed to run migrations: {}", e);
+            warn!("  Attempting to continue anyway (migrations may already be applied)");
         }
     }
 
