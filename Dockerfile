@@ -1,82 +1,69 @@
 # Multi-stage build for Rust application
-# Optimized for production deployment with proper error handling
-
-# Stage 1: Builder
-FROM rust:1.90 AS builder
+FROM rust:1.90-slim AS builder
 
 WORKDIR /app
 
-# Copy manifests first for better layer caching
-COPY Cargo.toml ./
+# Install build dependencies
+RUN apt-get update && apt-get install -y \
+    pkg-config \
+    libssl-dev \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy Cargo.lock if it exists (optional but recommended)
-# Using shell test to avoid build failure if file doesn't exist
-RUN mkdir -p .cargo
-COPY Cargo.lock* ./
+# Copy manifests
+COPY Cargo.toml Cargo.lock* ./
 
-# Create a dummy main.rs to cache dependencies
-# This layer will be cached unless Cargo.toml changes
+# Create dummy main to cache dependencies
 RUN mkdir src && \
     echo "fn main() {}" > src/main.rs && \
     cargo build --release && \
     rm -rf src
 
-# Copy source code and configuration
+# Copy source and migrations
 COPY src ./src
 COPY diesel.toml ./
 COPY migrations ./migrations
 
-# Build the actual application
-# Use --locked if Cargo.lock exists to ensure reproducible builds
-RUN cargo build --release && \
-    strip target/release/poli_market_api
+# Build application
+RUN cargo build --release
 
-# Verify the binary was created and is executable
-RUN test -f target/release/poli_market_api && \
-    test -x target/release/poli_market_api
-
-# Stage 2: Runtime
+# Runtime stage
 FROM debian:bookworm-slim
-
-# Install runtime dependencies
-# - libpq5: PostgreSQL client library
-# - ca-certificates: For HTTPS connections
-# - curl: For healthcheck
-RUN apt-get update && \
-    apt-get install -y \
-    libpq5 \
-    ca-certificates \
-    curl \
-    && rm -rf /var/lib/apt/lists/* \
-    && apt-get clean
 
 WORKDIR /app
 
-# Copy binary from builder
-COPY --from=builder /app/target/release/poli_market_api .
+# Install runtime dependencies
+RUN apt-get update && apt-get install -y \
+    ca-certificates \
+    libssl3 \
+    libpq5 \
+    postgresql-client \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy entrypoint script
-COPY docker-entrypoint.sh .
+# Copy binary and startup script
+COPY --from=builder /app/target/release/poli_market_api /app/
+COPY ./start.sh /app/start.sh
+COPY ./migrations /app/migrations
+COPY ./diesel.toml /app/
 
-# Ensure binary and script are executable
-RUN chmod +x ./poli_market_api && \
-    chmod +x ./docker-entrypoint.sh
+# Make executable
+RUN chmod +x /app/start.sh /app/poli_market_api
 
-# Create non-root user for security
+# Create non-root user
 RUN useradd -m -u 1000 appuser && \
     chown -R appuser:appuser /app
 
 USER appuser
 
-# Expose the application port
+# Set defaults
+ENV RUST_LOG=info
+ENV RUST_BACKTRACE=1
+
 EXPOSE 8080
 
-# Add healthcheck to ensure container is actually running
-HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-    CMD curl -f http://localhost:8080/v1/health || exit 1
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
+  CMD curl -f http://localhost:8080/v1/health || exit 1
 
-# Use entrypoint for better debugging
-ENTRYPOINT ["./docker-entrypoint.sh"]
-
-# Run the application
-CMD ["./poli_market_api"]
+# Start with script
+CMD ["/app/start.sh"]
