@@ -2,7 +2,6 @@ use diesel::prelude::*;
 use diesel::r2d2::{ConnectionManager, Pool, PooledConnection};
 use uuid::Uuid;
 use crate::modules::common::errors::{ApiError, ApiResult};
-use crate::modules::common::types::TipoMovimiento;
 use crate::modules::inventarios::model::{Inventario, DetalleInventario, NuevoMovimiento};
 use crate::schema::{inventarios, detalle_inventarios};
 
