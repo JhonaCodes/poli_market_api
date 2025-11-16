@@ -67,7 +67,7 @@ módulo/
 
 ## Tecnologías
 
-- **Rust 1.75+**
+- **Rust 1.90+**
 - **Actix-web 4.11** - Framework web
 - **Diesel 2.3** - ORM para PostgreSQL
 - **PostgreSQL 15** - Base de datos
@@ -75,7 +75,7 @@ módulo/
 
 ## Requisitos Previos
 
-- Rust 1.75 o superior
+- Rust 1.90 o superior
 - PostgreSQL 15 o superior
 - Docker y Docker Compose (para despliegue con contenedores)
 
