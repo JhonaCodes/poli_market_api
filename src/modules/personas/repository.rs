@@ -30,7 +30,8 @@ impl PersonaRepository {
         personas::table
             .find(id)
             .filter(personas::activo.eq(true))
-            .first::<Persona>(&mut conn)
+            .select(Persona::as_select())
+            .first(&mut conn)
             .map_err(|e| match e {
                 diesel::result::Error::NotFound => ApiError::NotFound(format!("Persona con ID {} no encontrada", id)),
                 _ => ApiError::DatabaseError(e.to_string()),
@@ -49,7 +50,8 @@ impl PersonaRepository {
         }
 
         query
-            .load::<Persona>(&mut conn)
+            .select(Persona::as_select())
+            .load(&mut conn)
             .map_err(|e| ApiError::DatabaseError(e.to_string()))
     }
 

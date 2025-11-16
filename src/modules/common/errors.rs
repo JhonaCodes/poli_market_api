@@ -1,5 +1,4 @@
 use actix_web::{HttpResponse, ResponseError};
-use std::fmt;
 use thiserror::Error;
 
 #[derive(Error, Debug)]

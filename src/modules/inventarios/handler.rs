@@ -1,5 +1,4 @@
 use actix_web::{web, HttpResponse, ResponseError, Result};
-use crate::modules::inventarios::service::InventarioService;
 use crate::state::app_state::AppState;
 
 /// GET /api/inventario/disponibilidad/:id - RF5: Consultar disponibilidad

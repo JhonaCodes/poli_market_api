@@ -1,6 +1,5 @@
 use actix_web::{web, HttpResponse, ResponseError, Result};
 use crate::modules::ventas::model::{CrearVentaRequest, VentasQueryParams};
-use crate::modules::ventas::service::VentaService;
 use crate::state::app_state::AppState;
 
 /// POST /api/ventas - RF1: Crear venta

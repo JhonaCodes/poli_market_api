@@ -1,9 +1,7 @@
 use bigdecimal::{BigDecimal, ToPrimitive};
 use chrono::{Utc, NaiveDateTime};
 use uuid::Uuid;
-use std::str::FromStr;
 use crate::modules::common::errors::{ApiError, ApiResult};
-use crate::modules::common::types::TipoMovimiento;
 use crate::modules::ventas::model::{
     CrearVentaRequest, VentaCreadaResponse, VentaResponse, DetalleVentaResponse,
     NuevaVenta, NuevoDetalleVenta,
@@ -12,7 +10,6 @@ use crate::modules::ventas::repository::VentaRepository;
 use crate::modules::personas::repository::PersonaRepository;
 use crate::modules::productos::repository::ProductoRepository;
 use crate::modules::inventarios::repository::InventarioRepository;
-use crate::modules::inventarios::model::NuevoMovimiento;
 
 pub struct VentaService {
     venta_repo: VentaRepository,

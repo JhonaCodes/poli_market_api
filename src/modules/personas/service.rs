@@ -1,7 +1,7 @@
 use uuid::Uuid;
 use crate::modules::common::errors::{ApiError, ApiResult};
 use crate::modules::common::types::TipoPerfil;
-use crate::modules::personas::model::{Persona, PersonaResponse};
+use crate::modules::personas::model::PersonaResponse;
 use crate::modules::personas::repository::PersonaRepository;
 
 pub struct PersonaService {

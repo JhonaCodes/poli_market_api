@@ -75,7 +75,7 @@ async fn main() -> std::io::Result<()> {
             .wrap(Logger::default())
             .wrap(cors)
             .service(
-                web::scope("/api")
+                web::scope("/v1")
                     // Health check endpoint
                     .route("/health", web::get().to(health_check))
                     // Module routes

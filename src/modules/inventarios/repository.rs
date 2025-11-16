@@ -30,7 +30,8 @@ impl InventarioRepository {
         let inventario = inventarios::table
             .filter(inventarios::id_producto.eq(id_producto))
             .filter(inventarios::activo.eq(true))
-            .first::<Inventario>(&mut conn)
+            .select(Inventario::as_select())
+            .first(&mut conn)
             .map_err(|e| match e {
                 diesel::result::Error::NotFound => ApiError::NotFound(format!("Inventario para producto {} no encontrado", id_producto)),
                 _ => ApiError::DatabaseError(e.to_string()),
@@ -72,7 +73,8 @@ impl InventarioRepository {
             .filter(detalle_inventarios::id_producto.eq(id_producto))
             .filter(detalle_inventarios::activo.eq(true))
             .order(detalle_inventarios::fecha.desc())
-            .load::<DetalleInventario>(&mut conn)
+            .select(DetalleInventario::as_select())
+            .load(&mut conn)
             .map_err(|e| ApiError::DatabaseError(e.to_string()))
     }
 }

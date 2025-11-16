@@ -20,14 +20,16 @@ pub struct AppState {
 
 impl AppState {
     pub fn new(pool: DbPool) -> Self {
-        // Create repositories
-        let persona_repo = PersonaRepository::new(pool.clone());
-        let producto_repo = ProductoRepository::new(pool.clone());
-        let inventario_repo = InventarioRepository::new(pool.clone());
-        let venta_repo = VentaRepository::new(pool.clone());
+        // Create repositories (unused for now, but kept for future optimization)
+        let _persona_repo = PersonaRepository::new(pool.clone());
+        let _producto_repo = ProductoRepository::new(pool.clone());
+        let _inventario_repo = InventarioRepository::new(pool.clone());
+        let _venta_repo = VentaRepository::new(pool.clone());
 
         // Create services with their dependencies
-        let persona_service = PersonaService::new(persona_repo);
+        let persona_service = PersonaService::new(
+            PersonaRepository::new(pool.clone())
+        );
 
         let inventario_service = InventarioService::new(
             InventarioRepository::new(pool.clone()),

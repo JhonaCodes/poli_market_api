@@ -1,6 +1,5 @@
 use actix_web::{web, HttpResponse, ResponseError, Result};
 use serde::Deserialize;
-use crate::modules::personas::service::PersonaService;
 use crate::state::app_state::AppState;
 
 #[derive(Deserialize)]

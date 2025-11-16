@@ -57,7 +57,8 @@ impl VentaRepository {
         let venta = ventas::table
             .find(id)
             .filter(ventas::activo.eq(true))
-            .first::<Venta>(&mut conn)
+            .select(Venta::as_select())
+            .first(&mut conn)
             .map_err(|e| match e {
                 diesel::result::Error::NotFound => ApiError::NotFound(format!("Venta con ID {} no encontrada", id)),
                 _ => ApiError::DatabaseError(e.to_string()),
@@ -66,7 +67,8 @@ impl VentaRepository {
         let detalles = detalle_ventas::table
             .filter(detalle_ventas::id_venta.eq(id))
             .filter(detalle_ventas::activo.eq(true))
-            .load::<DetalleVenta>(&mut conn)
+            .select(DetalleVenta::as_select())
+            .load(&mut conn)
             .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
         Ok((venta, detalles))
@@ -103,7 +105,8 @@ impl VentaRepository {
 
         query
             .order(ventas::fecha.desc())
-            .load::<Venta>(&mut conn)
+            .select(Venta::as_select())
+            .load(&mut conn)
             .map_err(|e| ApiError::DatabaseError(e.to_string()))
     }
 
@@ -113,7 +116,8 @@ impl VentaRepository {
         detalle_ventas::table
             .filter(detalle_ventas::id_venta.eq(id_venta))
             .filter(detalle_ventas::activo.eq(true))
-            .load::<DetalleVenta>(&mut conn)
+            .select(DetalleVenta::as_select())
+            .load(&mut conn)
             .map_err(|e| ApiError::DatabaseError(e.to_string()))
     }
 }

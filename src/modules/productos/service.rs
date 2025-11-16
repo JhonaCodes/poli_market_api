@@ -1,6 +1,6 @@
 use uuid::Uuid;
 use crate::modules::common::errors::{ApiError, ApiResult};
-use crate::modules::productos::model::{Producto, ProductoResponse};
+use crate::modules::productos::model::ProductoResponse;
 use crate::modules::productos::repository::ProductoRepository;
 use crate::modules::inventarios::repository::InventarioRepository;
 use bigdecimal::ToPrimitive;

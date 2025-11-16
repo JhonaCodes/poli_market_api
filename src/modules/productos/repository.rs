@@ -29,7 +29,8 @@ impl ProductoRepository {
         productos::table
             .find(id)
             .filter(productos::activo.eq(true))
-            .first::<Producto>(&mut conn)
+            .select(Producto::as_select())
+            .first(&mut conn)
             .map_err(|e| match e {
                 diesel::result::Error::NotFound => ApiError::ProductNotFound,
                 _ => ApiError::DatabaseError(e.to_string()),
@@ -42,7 +43,8 @@ impl ProductoRepository {
         productos::table
             .filter(productos::activo.eq(true))
             .order(productos::nombre.asc())
-            .load::<Producto>(&mut conn)
+            .select(Producto::as_select())
+            .load(&mut conn)
             .map_err(|e| ApiError::DatabaseError(e.to_string()))
     }
 

@@ -1,5 +1,4 @@
 use actix_web::{web, HttpResponse, ResponseError, Result};
-use crate::modules::productos::service::ProductoService;
 use crate::state::app_state::AppState;
 
 /// GET /api/productos/:id - RF3: Obtener producto por ID con stock

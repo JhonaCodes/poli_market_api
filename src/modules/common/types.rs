@@ -1,23 +1,16 @@
-use diesel::sql_types::Text;
 use diesel::deserialize::{self, FromSql};
 use diesel::pg::Pg;
 use diesel::serialize::{self, ToSql, Output};
 use std::io::Write;
-use diesel::{AsExpression, FromSqlRow, QueryId, SqlType};
+use diesel::{AsExpression, FromSqlRow};
 use serde::{Deserialize, Serialize};
 
-// Custom SQL types for Diesel
-#[derive(SqlType, QueryId)]
-#[diesel(postgres_type(name = "tipo_perfil"))]
-pub struct Tipo_perfil;
-
-#[derive(SqlType, QueryId)]
-#[diesel(postgres_type(name = "tipo_movimiento"))]
-pub struct Tipo_movimiento;
+// Import SQL types from schema
+use crate::schema::sql_types::{TipoPerfil as TipoPerfilSql, TipoMovimiento as TipoMovimientoSql};
 
 // Enum for TipoPerfil
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, AsExpression, FromSqlRow)]
-#[diesel(sql_type = Tipo_perfil)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, AsExpression, FromSqlRow)]
+#[diesel(sql_type = TipoPerfilSql)]
 pub enum TipoPerfil {
     #[serde(rename = "VENDEDOR")]
     Vendedor,
@@ -27,7 +20,7 @@ pub enum TipoPerfil {
     Proveedor,
 }
 
-impl ToSql<Tipo_perfil, Pg> for TipoPerfil {
+impl ToSql<TipoPerfilSql, Pg> for TipoPerfil {
     fn to_sql<'b>(&'b self, out: &mut Output<'b, '_, Pg>) -> serialize::Result {
         match *self {
             TipoPerfil::Vendedor => out.write_all(b"VENDEDOR")?,
@@ -38,7 +31,7 @@ impl ToSql<Tipo_perfil, Pg> for TipoPerfil {
     }
 }
 
-impl FromSql<Tipo_perfil, Pg> for TipoPerfil {
+impl FromSql<TipoPerfilSql, Pg> for TipoPerfil {
     fn from_sql(bytes: diesel::pg::PgValue) -> deserialize::Result<Self> {
         match bytes.as_bytes() {
             b"VENDEDOR" => Ok(TipoPerfil::Vendedor),
@@ -50,8 +43,8 @@ impl FromSql<Tipo_perfil, Pg> for TipoPerfil {
 }
 
 // Enum for TipoMovimiento
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, AsExpression, FromSqlRow)]
-#[diesel(sql_type = Tipo_movimiento)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, AsExpression, FromSqlRow)]
+#[diesel(sql_type = TipoMovimientoSql)]
 pub enum TipoMovimiento {
     #[serde(rename = "ENTRADA")]
     Entrada,
@@ -61,7 +54,7 @@ pub enum TipoMovimiento {
     Ajuste,
 }
 
-impl ToSql<Tipo_movimiento, Pg> for TipoMovimiento {
+impl ToSql<TipoMovimientoSql, Pg> for TipoMovimiento {
     fn to_sql<'b>(&'b self, out: &mut Output<'b, '_, Pg>) -> serialize::Result {
         match *self {
             TipoMovimiento::Entrada => out.write_all(b"ENTRADA")?,
@@ -72,7 +65,7 @@ impl ToSql<Tipo_movimiento, Pg> for TipoMovimiento {
     }
 }
 
-impl FromSql<Tipo_movimiento, Pg> for TipoMovimiento {
+impl FromSql<TipoMovimientoSql, Pg> for TipoMovimiento {
     fn from_sql(bytes: diesel::pg::PgValue) -> deserialize::Result<Self> {
         match bytes.as_bytes() {
             b"ENTRADA" => Ok(TipoMovimiento::Entrada),
