@@ -55,9 +55,8 @@ WORKDIR /app
 # Copy binary from builder
 COPY --from=builder /app/target/release/poli_market_api .
 
-# Verify binary is executable
-RUN chmod +x ./poli_market_api && \
-    file ./poli_market_api
+# Ensure binary is executable
+RUN chmod +x ./poli_market_api
 
 # Create non-root user for security
 RUN useradd -m -u 1000 appuser && \
