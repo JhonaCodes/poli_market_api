@@ -44,7 +44,7 @@ impl From<Persona> for PersonaResponse {
     }
 }
 
-// DTO for creating a new Persona
+// DTO for creating a new Persona (database insert)
 #[derive(Debug, Deserialize, Insertable)]
 #[diesel(table_name = personas)]
 pub struct NuevaPersona {
@@ -53,4 +53,21 @@ pub struct NuevaPersona {
     pub perfil: TipoPerfil,
     pub email: Option<String>,
     pub telefono: Option<String>,
+}
+
+// DTO for persona creation request
+#[derive(Debug, Deserialize)]
+pub struct CrearPersonaRequest {
+    pub nombre: String,
+    pub documento: String,
+    pub perfil: String,
+    pub email: Option<String>,
+    pub telefono: Option<String>,
+}
+
+// DTO for persona creation response
+#[derive(Debug, Serialize)]
+pub struct PersonaCreadaResponse {
+    pub id: String,
+    pub mensaje: String,
 }

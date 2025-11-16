@@ -29,7 +29,7 @@ pub struct ProductoResponse {
     pub stock_actual: i32,
 }
 
-// DTO for creating a new Producto
+// DTO for creating a new Producto (database insert)
 #[derive(Debug, Deserialize, Insertable)]
 #[diesel(table_name = productos)]
 pub struct NuevoProducto {
@@ -37,4 +37,20 @@ pub struct NuevoProducto {
     pub cantidad: i32,
     pub unidad_venta: String,
     pub precio_unitario: BigDecimal,
+}
+
+// DTO for producto creation request
+#[derive(Debug, Deserialize)]
+pub struct CrearProductoRequest {
+    pub nombre: String,
+    pub cantidad: i32,
+    pub unidad_venta: String,
+    pub precio_unitario: f64,
+}
+
+// DTO for producto creation response
+#[derive(Debug, Serialize)]
+pub struct ProductoCreadoResponse {
+    pub id: String,
+    pub mensaje: String,
 }

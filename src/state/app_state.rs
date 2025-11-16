@@ -41,12 +41,14 @@ impl AppState {
         let inventario_service = InventarioService::new(
             InventarioRepository::new(pool.clone()),
             ProductoRepository::new(pool.clone()),
+            PersonaRepository::new(pool.clone()),
         );
 
         info!("  → Creating ProductoService...");
         let producto_service = ProductoService::new(
             ProductoRepository::new(pool.clone()),
             InventarioRepository::new(pool.clone()),
+            PersonaRepository::new(pool.clone()),
         );
 
         info!("  → Creating VentaService...");

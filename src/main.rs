@@ -168,10 +168,13 @@ async fn main() -> std::io::Result<()> {
     info!("🚀 Server is running and ready to accept connections!");
     info!("📍 Available endpoints:");
     info!("   GET  /v1/health");
+    info!("   POST /v1/personas");
     info!("   GET  /v1/personas");
     info!("   GET  /v1/personas/{{id}}");
+    info!("   POST /v1/productos");
     info!("   GET  /v1/productos");
     info!("   GET  /v1/productos/{{id}}");
+    info!("   POST /v1/inventario/movimientos");
     info!("   GET  /v1/inventario/disponibilidad/{{id}}");
     info!("   POST /v1/ventas");
     info!("   GET  /v1/ventas");

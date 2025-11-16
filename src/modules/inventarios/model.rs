@@ -62,3 +62,10 @@ pub struct MovimientoRequest {
     pub cantidad: i32,
     pub observaciones: Option<String>,
 }
+
+// DTO for movement response
+#[derive(Debug, Serialize)]
+pub struct MovimientoRegistradoResponse {
+    pub id: String,
+    pub mensaje: String,
+}

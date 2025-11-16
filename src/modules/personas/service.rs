@@ -1,7 +1,7 @@
 use uuid::Uuid;
 use crate::modules::common::errors::{ApiError, ApiResult};
 use crate::modules::common::types::TipoPerfil;
-use crate::modules::personas::model::PersonaResponse;
+use crate::modules::personas::model::{PersonaResponse, CrearPersonaRequest, PersonaCreadaResponse, NuevaPersona};
 use crate::modules::personas::repository::PersonaRepository;
 
 pub struct PersonaService {
@@ -48,5 +48,51 @@ impl PersonaService {
             return Err(ApiError::InactiveClient);
         }
         Ok(())
+    }
+
+    /// Crear una nueva persona
+    pub fn crear_persona(&self, request: CrearPersonaRequest) -> ApiResult<PersonaCreadaResponse> {
+        // Validar campos requeridos
+        if request.nombre.trim().is_empty() {
+            return Err(ApiError::InvalidInput("El nombre es requerido".to_string()));
+        }
+
+        if request.documento.trim().is_empty() {
+            return Err(ApiError::InvalidInput("El documento es requerido".to_string()));
+        }
+
+        // Parsear y validar tipo de perfil
+        let perfil = match request.perfil.to_uppercase().as_str() {
+            "VENDEDOR" => TipoPerfil::Vendedor,
+            "CLIENTE" => TipoPerfil::Cliente,
+            "PROVEEDOR" => TipoPerfil::Proveedor,
+            _ => return Err(ApiError::InvalidInput(
+                "Tipo de perfil inválido. Valores permitidos: VENDEDOR, CLIENTE, PROVEEDOR".to_string()
+            )),
+        };
+
+        // Validar formato de email si está presente
+        if let Some(ref email) = request.email {
+            if !email.trim().is_empty() && !email.contains('@') {
+                return Err(ApiError::InvalidInput("Formato de email inválido".to_string()));
+            }
+        }
+
+        // Crear el objeto para insertar en la base de datos
+        let nueva_persona = NuevaPersona {
+            nombre: request.nombre.trim().to_string(),
+            documento: request.documento.trim().to_string(),
+            perfil,
+            email: request.email.filter(|e| !e.trim().is_empty()),
+            telefono: request.telefono.filter(|t| !t.trim().is_empty()),
+        };
+
+        // Guardar en la base de datos
+        let id = self.repository.crear(nueva_persona)?;
+
+        Ok(PersonaCreadaResponse {
+            id: id.to_string(),
+            mensaje: "Persona creada exitosamente".to_string(),
+        })
     }
 }

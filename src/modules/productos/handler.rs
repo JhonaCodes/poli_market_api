@@ -1,5 +1,19 @@
 use actix_web::{web, HttpResponse, ResponseError, Result};
+use crate::modules::productos::model::CrearProductoRequest;
 use crate::state::app_state::AppState;
+
+/// POST /api/productos - Crear nuevo producto
+pub async fn crear_producto(
+    state: web::Data<AppState>,
+    body: web::Json<CrearProductoRequest>,
+) -> Result<HttpResponse> {
+    let service = &state.producto_service;
+
+    match service.crear_producto(body.into_inner()) {
+        Ok(response) => Ok(HttpResponse::Created().json(response)),
+        Err(e) => Ok(e.error_response()),
+    }
+}
 
 /// GET /api/productos/:id - RF3: Obtener producto por ID con stock
 pub async fn obtener_producto(
@@ -30,6 +44,7 @@ pub async fn listar_productos(
 pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(
         web::scope("/productos")
+            .route("", web::post().to(crear_producto))
             .route("", web::get().to(listar_productos))
             .route("/{id}", web::get().to(obtener_producto))
     );
